@@ -1,19 +1,9 @@
 <?php
+require_once ('src/function.php');
+
 //Задание #3.1
 $file = file_get_contents('data.xml');
 $xml = new SimpleXMLElement($file);
-
-function xml ($xml){
-    echo '<br>';
-    foreach ($xml as $value => $key){
-        echo '<div style="background: azure; border: 1px solid #e1e1e1; padding: 14px 0 0 10px;">';
-        echo '<strong>' . $value . '</strong>' . ':' . $key->__toString() . '<br><br>';
-        echo '</div>';
-        if (is_object($key)){
-            xml ($key);
-        }
-    }
-}
 
 if ($xml === false) {
     echo "Failed loading XML: ";
@@ -21,7 +11,7 @@ if ($xml === false) {
         echo "<br>", $error->message;
     }
 } else {
-    xml($xml);
+    printOrder($xml);
 }
 //Задача #3.2
 
@@ -65,19 +55,17 @@ $arr2 = [
     ]
 ];
 $file = 'output.json';
+$file2 = 'output2.json';
 $json = json_encode($arr);
+$json2 = json_encode($arr2);
 
 file_put_contents($file,$json);
 $json = json_decode($json,true);
 
 if (rand(0,1)){
-    $file2 = 'output2.json';
-    $json2 = json_encode($arr2);
-    file_put_contents($file2,$json2);
-    $json2 = file_get_contents($file2);
-    $json2 = json_decode($json2,true);
+    $json2 = writeAndGetContent($file2,$json2);
 }else{
-    $json2 = $json;
+    $json2 = writeAndGetContent($file2,$json);
 }
 
 $res = array_diff_assoc($json2,$json);
@@ -102,6 +90,11 @@ $fp = fopen('test.csv','r');
 $res = fgetcsv($fp,1000,',');
 fclose($fp);
 
+for ($i = 0; $i <= 50; $i++){
+    if ($res[$i] % 2 !== 0 || $res[$i] == 0){
+        unset($res[$i]);
+    }
+}
 
 $sum = array_sum($res);
 echo 'Sum of all elements in array is:' . $sum . '<br>';
@@ -118,18 +111,5 @@ echo 'The page id is: ' . $json['query']['pages']['15580374']['pageid'] . '<br>'
 echo 'Title of the page is: ' . $json['query']['pages']['15580374']['title'] . '<br>';
 
 //Second version
-function rec($arr,$flag){
-    foreach ($arr as $value => $key ){
-       if (is_array($key)){
-           rec($key,$flag);
-       }
-       if ($value === $flag){
-           if (!is_array($key)){
-               echo $key;
-           }
-       }
-    }
-}
-
-rec($json,'title');
-rec($json,'pageid');
+searchRecursive($json,'title');
+searchRecursive($json,'pageid');
